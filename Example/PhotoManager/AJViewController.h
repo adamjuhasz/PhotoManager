@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AJViewController : UIViewController
+@interface AJViewController : UIViewController <UICollectionViewDataSource>
+
+@property IBOutlet UICollectionView *collectionView;
+@property IBOutlet UIView *layoutButton;
+@property IBOutlet UIActivityIndicatorView *activityIndicator;
 
 @end
