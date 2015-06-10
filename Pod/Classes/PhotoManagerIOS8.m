@@ -11,6 +11,24 @@
 
 #define PhotosToLoad 50
 
+@interface UIImage (AJNormalization)
+- (UIImage *)normalizedImage;
+@end
+
+@implementation UIImage (AJNormalization)
+
+- (UIImage *)normalizedImage {
+    if (self.imageOrientation == UIImageOrientationUp) return self;
+    
+    UIGraphicsBeginImageContextWithOptions(self.size, NO, self.scale);
+    [self drawInRect:(CGRect){0, 0, self.size}];
+    UIImage *normalizedImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return normalizedImage;
+}
+
+@end
+
 @interface PhotoManagerIOS8 ()
 {
     NSMutableDictionary *albums;
@@ -29,6 +47,7 @@
         albums = [NSMutableDictionary dictionary];
         thumbnailSize = CGSizeMake(157, 157);
         cachedLocations = [NSMutableDictionary dictionary];
+        [self checkAuthorization];
     }
     return self;
 }
@@ -158,7 +177,8 @@
     
     [[PHImageManager defaultManager] requestImageForAsset:asset targetSize:PHImageManagerMaximumSize contentMode:PHImageContentModeDefault options:options resultHandler:^(UIImage *result, NSDictionary *info) {
         if (completionBlock) {
-            completionBlock(result, asset.location);
+            UIImage *fullResImage = [result normalizedImage];
+            completionBlock(fullResImage, asset.location);
         }
     }];
 }
