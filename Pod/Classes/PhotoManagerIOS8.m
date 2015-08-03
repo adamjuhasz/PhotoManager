@@ -29,7 +29,7 @@
 
 @end
 
-@interface PhotoManagerIOS8 ()
+@interface PhotoManagerIOS8 () <UIAlertViewDelegate>
 {
     NSMutableDictionary *albums;
     PHCachingImageManager *cacher;
@@ -81,6 +81,16 @@
     else
         self.authorized = NO;
     
+    if (state == PHAuthorizationStatusDenied || PHAuthorizationStatusRestricted) {
+        UIAlertView* curr2=[[UIAlertView alloc] initWithTitle:@"Later doesn't have access to your photos"
+                                                      message:@"You can enable access in Settings->Privacy->Photos"
+                                                     delegate:self
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:@"Open Settings", nil];
+        curr2.tag=121;
+        [curr2 show];
+    }
+    
     return self.authorized;
 }
 
@@ -128,8 +138,28 @@
     }
 }
 
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 121 && buttonIndex == 1)
+    {
+        //code for opening settings app in iOS 8
+        [[UIApplication sharedApplication] openURL:[NSURL  URLWithString:UIApplicationOpenSettingsURLString]];
+    }
+}
+
 - (void)cacheThumbnailsForAlbum:(NSString*)wantedAlbumName withRange:(NSRange)requestedRange completionBlock:(void (^)(NSDictionary* photos))completionBlock
 {
+    if ([self checkAuthorization] == NO) {
+        UIAlertView* curr2=[[UIAlertView alloc] initWithTitle:@"Later doesn't have access to your photos..."
+                                                      message:@"You can enable access in Settings->Privacy->Photos->Later"
+                                                     delegate:self
+                                            cancelButtonTitle:@"OK"
+                                            otherButtonTitles:@"Open Settings", nil];
+        curr2.tag=121;
+        [curr2 show];
+        return;
+    }
+
     if (cacher == nil) {
         cacher = [[PHCachingImageManager alloc] init];
         cacher.allowsCachingHighQualityImages = NO;
@@ -191,6 +221,10 @@
     }
     
     PHFetchResult *fetchResult = [albums objectForKey:wantedAlbumName];
+    if (fetchResult.count == 0) {
+        
+        return;
+    }
     PHAsset *asset = fetchResult[index];
     PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
     options.synchronous = NO;
