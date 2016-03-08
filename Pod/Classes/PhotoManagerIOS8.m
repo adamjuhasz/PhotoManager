@@ -81,7 +81,7 @@
     else
         self.authorized = NO;
     
-    if (state == PHAuthorizationStatusDenied || PHAuthorizationStatusRestricted) {
+    if (state == PHAuthorizationStatusDenied || state == PHAuthorizationStatusRestricted) {
         UIAlertView* curr2=[[UIAlertView alloc] initWithTitle:@"Later doesn't have access to your photos"
                                                       message:@"You can enable access in Settings->Privacy->Photos"
                                                      delegate:self
@@ -150,7 +150,7 @@
 - (void)cacheThumbnailsForAlbum:(NSString*)wantedAlbumName withRange:(NSRange)requestedRange completionBlock:(void (^)(NSDictionary* photos))completionBlock
 {
     if ([self checkAuthorization] == NO) {
-        UIAlertView* curr2=[[UIAlertView alloc] initWithTitle:@"Later doesn't have access to your photos..."
+        UIAlertView* curr2=[[UIAlertView alloc] initWithTitle:@"Later doesn't have access to your photos"
                                                       message:@"You can enable access in Settings->Privacy->Photos->Later"
                                                      delegate:self
                                             cancelButtonTitle:@"OK"
